@@ -68,6 +68,30 @@ preshr.get("/", opts, (request, respond) => {
 
 });
 
+presher.queue('image-creation', {
+  // Processors are sandboxed *processes*
+  // that cannot crash the worker and utilise
+  // multiple cores
+  processor: '/path/to/my/processor.js',
+  // Global job completed on any worker for this queue
+  completed: (jobId) => console.log(`${jobId} completed`)
+  options: {
+    // Rate limiting queues
+    limiter: {
+      max: 1000,
+      duration: 5000
+    }
+  }
+})
+
+presher.queue('video-comppression', {
+  // It's be great if these queue processors
+  // could be greated in a folder and then
+  // webpacked as entry points out, so we can
+  // write ES6 everywhere, and also a centralised config
+  processor: '/path/to/video/processor.js'
+})
+
 preshr.start({
   port: 3000,
   // Preshr will support clustering out of the box
@@ -76,32 +100,5 @@ preshr.start({
     lifetime: 10000,  // ms to keep cluster alive (Infinity)
     grace: 4000,
   },
-  // Initialise queues
-  queues: [
-    {
-      name: 'image-creation',
-      // Processors are sandboxed *processes*
-      // that cannot crash the worker and utilise
-      // multiple cores
-      processor: '/path/to/my/processor.js',
-      // Global job completed on any worker for this queue
-      completed: (jobId) => console.log(`${jobId} completed`)
-      options: {
-        // Rate limiting queues
-        limiter: {
-          max: 1000,
-          duration: 5000
-        }
-      }
-    },
-    {
-      name: 'video-comppression',
-      // It's be great if these queue processors
-      // could be greated in a folder and then
-      // webpacked as entry points out, so we can
-      // write ES6 everywhere, and also a centralised config
-      processor: '/path/to/video/processor.js'
-    }
-  ]
 });
 ```
